@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
-import { generateChatResponse, type ChatMessage } from '../../lib/anthropic';
-import { saveMessage } from '../../lib/supabase';
+import { findBestResponse } from '../../lib/autoResponses';
+import { saveConversation } from '../../lib/supabase';
 
 // Rate limiting: almacena timestamps de mensajes por sesión
 const messageTimestamps = new Map<string, number[]>();
@@ -44,7 +44,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Parsear el body de la petición
     const body = await request.json();
-    const { message, sessionId, history } = body;
+    const { message, sessionId } = body;
 
     // Validar datos requeridos
     if (!message || typeof message !== 'string') {
@@ -83,37 +83,19 @@ export const POST: APIRoute = async ({ request }) => {
     // Registrar este mensaje para rate limiting
     recordMessage(sessionId);
 
-    // Preparar el historial de mensajes
-    const messages: ChatMessage[] = [
-      ...(Array.isArray(history) ? history : []),
-      { role: 'user', content: message },
-    ];
+    // Generar respuesta automática basada en palabras clave
+    const assistantResponse = findBestResponse(message);
 
-    // Generar respuesta usando Claude
-    let assistantResponse: string;
+    // Guardar conversación completa en Supabase
     try {
-      assistantResponse = await generateChatResponse(messages);
+      console.log('Intentando guardar conversación...', { sessionId, message, assistantResponse });
+      await saveConversation(sessionId, message, assistantResponse);
+      console.log('✅ Conversación guardada exitosamente');
     } catch (error) {
-      console.error('Error al generar respuesta de Claude:', error);
-      return new Response(
-        JSON.stringify({
-          error: 'No se pudo generar una respuesta. Por favor, intenta de nuevo.',
-        }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    // Guardar ambos mensajes en Supabase (user y assistant)
-    try {
-      await saveMessage(sessionId, 'user', message);
-      await saveMessage(sessionId, 'assistant', assistantResponse);
-    } catch (error) {
-      console.error('Error al guardar mensajes en Supabase:', error);
+      console.error('❌ Error al guardar conversación en Supabase:', error);
+      console.error('Detalles del error:', JSON.stringify(error, null, 2));
       // No fallar la petición si falla el guardado, solo registrar el error
-      // La respuesta de Claude ya fue generada exitosamente
+      // La respuesta ya fue generada exitosamente
     }
 
     // Retornar la respuesta

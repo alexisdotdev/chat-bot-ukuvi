@@ -16,7 +16,7 @@ export default function ChatInterface() {
 
   // Generar session ID al montar el componente
   useEffect(() => {
-    const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const newSessionId = crypto.randomUUID();
     setSessionId(newSessionId);
 
     // Mensaje de bienvenida
@@ -97,7 +97,7 @@ export default function ChatInterface() {
 
   // Limpiar historial
   const handleClearHistory = () => {
-    const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const newSessionId = crypto.randomUUID();
     setSessionId(newSessionId);
     setMessages([
       {
