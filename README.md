@@ -227,21 +227,6 @@ Para modificar el conocimiento base, edita el `UKUVI_SYSTEM_PROMPT` en `src/lib/
 - El rate limiting está implementado para prevenir abuso (10 mensajes/minuto)
 - Considera agregar autenticación si el chatbot contendrá información sensible
 
-## 📝 Personalización
-
-### Cambiar el modelo de Claude
-
-En `src/lib/anthropic.ts`, modifica la línea:
-
-```typescript
-model: 'claude-3-5-sonnet-20241022', // Cambiar por otro modelo
-```
-
-Modelos disponibles:
-- `claude-3-5-sonnet-20241022` (recomendado - balance entre velocidad y calidad)
-- `claude-3-opus-20240229` (más potente, más lento)
-- `claude-3-haiku-20240307` (más rápido, menos potente)
-
 ### Personalizar estilos
 
 Edita `src/styles/chat.css` para cambiar colores, fuentes, y layout.
@@ -272,17 +257,3 @@ const RATE_LIMIT_WINDOW = 60 * 1000; // ventana en milisegundos
 ## 📄 Licencia
 
 Este proyecto es de código abierto y está disponible bajo la licencia MIT.
-
-## 🤝 Contribuciones
-
-Las contribuciones son bienvenidas. Por favor:
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
----
-
-Hecho con ❤️ para UKUVI
